@@ -61,7 +61,7 @@ UI tests run in **Chromium, Firefox and WebKit** (Safari's engine). In total: 13
 You need **Node.js 20.12 or newer** and Git.
 
 ```bash
-git clone <this repository>
+git clone https://github.com/Mturkestani/nitx-qa-automation.git
 cd nitx-qa-automation
 npm ci
 npx playwright install --with-deps
