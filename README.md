@@ -41,6 +41,7 @@ UI tests run in **Chromium, Firefox and WebKit** (Safari's engine). In total: 13
 │   └── test.ts                our `test`: Playwright's test plus ready-made page objects
 ├── utils/
 │   ├── botCheck.ts            skips a test if the site's bot check (Cloudflare) appears
+│   ├── demoAccount.ts         the reason used when the shared demo account is locked
 │   ├── products.ts            finds a product that is in stock right now (through the API)
 │   └── urls.ts                the site and API addresses, in one place
 ├── test-data/                 test data, kept out of the test code
@@ -119,4 +120,5 @@ Without it, the two tests are **skipped** with a clear message, and everything e
 
 - The site is public and shared. Its products or texts can change, and it can be slow or down. A failure is not always a bug in the tests: check the report first.
 - Cloudflare's bot check can appear on CI machines. Affected tests are skipped, not passed. Check the skipped count in the report.
+- The demo account is shared by everyone who uses the site, and it locks after 3 wrong passwords. When other people lock it, the two `@auth` tests are skipped with that reason until the site resets its data. The tests in this repository never send a wrong password to that account.
 - Not covered: registration of a new account (it would create real accounts on a shared site), logged-in checkout, payment methods other than cash on delivery, and the admin area.

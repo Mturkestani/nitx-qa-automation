@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import users from '../../test-data/users.json';
+import { ACCOUNT_LOCKED, LOCKED_REASON } from '../../utils/demoAccount';
 
 // This test uses the real demo password (from .env or GitHub Secrets).
 // No trace in this file: it would record the password in the request body.
@@ -13,8 +14,11 @@ test.describe('Users API with the demo account', () => {
     const login = await request.post('/users/login', {
       data: { email: users.customer.email, password },
     });
+    const body = await login.json();
+    test.skip(ACCOUNT_LOCKED.test(body.error ?? ''), LOCKED_REASON);
+
     expect(login.status()).toBe(200);
-    const { access_token } = await login.json();
+    const { access_token } = body;
     expect(access_token).toBeTruthy();
 
     const me = await request.get('/users/me', {
