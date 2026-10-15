@@ -1,0 +1,13 @@
+{
+  "customer": {
+    "email": "customer@practicesoftwaretesting.com",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "passwordEnv": "CUSTOMER_PASSWORD"
+  },
+  "unknownUser": {
+    "email": "no.such.user@example.com",
+    "password": "Not-A-Real-Password-1"
+  },
+  "invalidEmails": ["plainaddress", "user@", "@example.com", "user name@example.com"]
+}
