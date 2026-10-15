@@ -28,7 +28,20 @@ export class LoginPage {
 
   async login(email: string, password: string) {
     await this.emailInput.fill(email);
-    await this.passwordInput.fill(password);
+    await this.fillPassword(password);
     await this.submitButton.click();
+  }
+
+  /**
+   * fill() writes the typed value into the HTML report ("Fill \"...\"").
+   * For a password we set the value without logging it, then fire the same
+   * input event a user's typing would fire, so the form sees the change.
+   */
+  async fillPassword(password: string) {
+    await this.passwordInput.evaluate((el, value) => {
+      const input = el as HTMLInputElement;
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }, password);
   }
 }

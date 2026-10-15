@@ -86,7 +86,7 @@ Other commands:
 
 ### Tests that need a password (`@auth`)
 
-Two tests log in with the site's public demo account `customer@practicesoftwaretesting.com`. The password is listed in the [site's README](https://github.com/testsmith-io/practice-software-testing).
+Two tests log in with the site's public demo account `customer@practicesoftwaretesting.com`: `tests/ui/account.spec.ts` and `tests/api/account.api.spec.ts`. The password is listed in the [site's README](https://github.com/testsmith-io/practice-software-testing).
 
 To keep passwords out of the code, these tests read it from an environment variable:
 
@@ -108,6 +108,7 @@ Without it, the two tests are **skipped** with a clear message, and everything e
 - **Each test is independent.** Every checkout test fills its own cart, so tests can run in any order and in parallel.
 - **The real user path.** Checkout tests open the cart with the cart icon in the header, as a user does, instead of loading `/checkout` directly.
 - **Honest results when the site blocks us.** The site is behind Cloudflare. From some machines (for example GitHub's servers), a page load can show "Verify you are human" instead of the page. The tests never try to get past that check: the test is **skipped** with the reason "Blocked by the site's bot protection", so the report shows "not tested" instead of a false pass or a false failure.
+- **The password never reaches the reports.** `fill()` writes the typed value into the HTML report, so `LoginPage.fillPassword()` sets the password without logging it. The two files that use the password turn off trace and video, which would record it.
 - **No accounts are created.** The register test sends an empty body, which the API rejects before saving anything.
 - **Careful with a shared public site.** Two workers in CI, one retry in CI only (for network hiccups), and a trace, screenshot and video when a test fails.
 

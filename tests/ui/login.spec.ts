@@ -29,17 +29,4 @@ test.describe('Login', () => {
     await expect(loginPage.loginError).toContainText('Invalid email or password');
     await expect(page).toHaveURL(/\/auth\/login/);
   });
-
-  test('a customer can log in and sees their account @auth', async ({ loginPage, page }) => {
-    const password = process.env[users.customer.passwordEnv];
-    test.skip(!password, `Set ${users.customer.passwordEnv} in .env to run this test (see README).`);
-
-    await loginPage.login(users.customer.email, password!);
-
-    await expect(page).toHaveURL(/\/account/);
-    await expect(page.getByTestId('page-title')).toHaveText('My account');
-    await expect(page.getByTestId('nav-menu').filter({ visible: true })).toContainText(
-      `${users.customer.firstName} ${users.customer.lastName}`,
-    );
-  });
 });
