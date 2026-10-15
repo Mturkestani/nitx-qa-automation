@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, expect } from '@playwright/test';
 import { waitForPageOrSkip } from '../utils/botCheck';
 
 export type Guest = { email: string; firstName: string; lastName: string };
@@ -17,6 +17,10 @@ export type Address = {
  */
 export class CheckoutPage {
   readonly page: Page;
+
+  // The address form looks up the postal code by itself (see fillAddress).
+  private lookupsInFlight = 0;
+  private lastLookupActivity = 0;
 
   readonly cartIcon: Locator;
 
@@ -48,6 +52,16 @@ export class CheckoutPage {
 
   constructor(page: Page) {
     this.page = page;
+
+    const isLookup = (url: string) => url.includes('/postcode-lookup');
+    page.on('request', (r) => {
+      if (isLookup(r.url())) { this.lookupsInFlight++; this.lastLookupActivity = Date.now(); }
+    });
+    const done = (r: { url(): string }) => {
+      if (isLookup(r.url())) { this.lookupsInFlight--; this.lastLookupActivity = Date.now(); }
+    };
+    page.on('requestfinished', done);
+    page.on('requestfailed', done);
 
     this.cartIcon = page.getByTestId('nav-cart');
     this.cartProductTitles = page.getByTestId('product-title');
@@ -91,13 +105,30 @@ export class CheckoutPage {
     await this.proceedAsGuest.click();
   }
 
+  /**
+   * After country, postal code and house number are entered, the form waits 300 ms
+   * and calls /postcode-lookup (sometimes twice), then fills street, city and state
+   * by itself. If we type first, the lookup can overwrite our values a moment later.
+   * So: enter the three fields, wait until every lookup has finished and nothing new
+   * has started for 0.5 s, then type our own street, city and state.
+   */
   async fillAddress(address: Address) {
     await this.country.selectOption({ label: address.country });
     await this.postalCode.fill(address.postalCode);
     await this.houseNumber.fill(address.houseNumber);
+    await this.waitForPostcodeLookup();
     await this.street.fill(address.street);
     await this.city.fill(address.city);
     await this.state.fill(address.state);
+  }
+
+  private async waitForPostcodeLookup() {
+    await expect
+      .poll(
+        () => this.lastLookupActivity > 0 && this.lookupsInFlight === 0 && Date.now() - this.lastLookupActivity > 500,
+        { message: 'The postcode lookup did not finish', timeout: 15_000 },
+      )
+      .toBe(true);
   }
 
   async payWith(method: string) {

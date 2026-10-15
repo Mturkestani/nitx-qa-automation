@@ -30,6 +30,8 @@ test.describe('Checkout as a guest', () => {
 
     // Step 3: billing address
     await checkoutPage.fillAddress(checkout.address);
+    // The postcode lookup must not have replaced what we typed.
+    await expect(checkoutPage.city).toHaveValue(checkout.address.city);
     await expect(checkoutPage.proceedFromAddress).toBeEnabled();
     await checkoutPage.proceedFromAddress.click();
 
