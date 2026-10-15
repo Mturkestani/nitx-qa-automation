@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { baseUrl, apiUrl } from './utils/urls';
 
 // Load .env if it exists (Node 20.12+). Nothing breaks if the file is missing.
 try {
@@ -7,8 +8,8 @@ try {
   // no .env file: use the defaults below
 }
 
-const BASE_URL = process.env.BASE_URL ?? 'https://practicesoftwaretesting.com';
-const API_URL = process.env.API_URL ?? 'https://api.practicesoftwaretesting.com';
+const BASE_URL = baseUrl();
+const API_URL = apiUrl();
 const isCI = !!process.env.CI;
 
 export default defineConfig({

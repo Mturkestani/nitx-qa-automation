@@ -36,7 +36,9 @@ export class ProductListPage {
     await this.page.getByTestId('search_completed').waitFor();
   }
 
+  /** Click the product with exactly this name ("Hammer" must not open "Claw Hammer"). */
   async openProduct(name: string) {
-    await this.productNames.filter({ hasText: name }).first().click();
+    const exact = new RegExp(`^\\s*${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`);
+    await this.productNames.filter({ hasText: exact }).first().click();
   }
 }

@@ -1,12 +1,18 @@
 import { test, expect } from '../../fixtures/test';
 import checkout from '../../test-data/checkout.json';
+import { findBuyableProduct } from '../../utils/products';
 
 test.describe('Checkout as a guest', () => {
-  test.beforeEach(async ({ productListPage, productDetailPage }) => {
+  let product: string;
+
+  test.beforeEach(async ({ request, productListPage, productDetailPage }) => {
     // Start every test with one product in the cart.
+    // The product is picked at run time, because stock on the site changes.
+    product = await findBuyableProduct(request);
     await productListPage.open();
-    await productListPage.openProduct(checkout.product);
-    await expect(productDetailPage.name).toHaveText(checkout.product);
+    await productListPage.search(product);
+    await productListPage.openProduct(product);
+    await expect(productDetailPage.name).toHaveText(product);
     await productDetailPage.addToCart();
     await expect(productDetailPage.cartQuantity).toHaveText('1');
   });
@@ -16,7 +22,7 @@ test.describe('Checkout as a guest', () => {
 
     // Step 1: cart
     await expect(checkoutPage.cartProductTitles).toHaveCount(1);
-    await expect(checkoutPage.cartProductTitles.first()).toContainText(checkout.product);
+    await expect(checkoutPage.cartProductTitles.first()).toContainText(product);
     await checkoutPage.proceedFromCart.click();
 
     // Step 2: continue as guest
