@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { waitForPageOrSkip } from '../utils/botCheck';
 
 /** The home page: the product grid, search box and filters. */
 export class ProductListPage {
@@ -23,7 +24,7 @@ export class ProductListPage {
     await this.page.goto('/');
     // If we search before the first products arrive, they can arrive late
     // and replace the search results on the page.
-    await this.productNames.first().waitFor();
+    await waitForPageOrSkip(this.page, this.productNames.first());
   }
 
   /** Search, then wait until the page says the search is finished. */

@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { waitForPageOrSkip } from '../utils/botCheck';
 
 /** The login page: /auth/login */
 export class LoginPage {
@@ -22,6 +23,7 @@ export class LoginPage {
 
   async open() {
     await this.page.goto('/auth/login');
+    await waitForPageOrSkip(this.page, this.submitButton);
   }
 
   async login(email: string, password: string) {

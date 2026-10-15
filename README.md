@@ -39,6 +39,8 @@ UI tests run in **Chromium, Firefox and WebKit** (Safari's engine). In total: 13
 │   └── CheckoutPage.ts        the 4 checkout steps
 ├── fixtures/
 │   └── test.ts                our `test`: Playwright's test plus ready-made page objects
+├── utils/
+│   └── botCheck.ts            skips a test if the site's bot check (Cloudflare) appears
 ├── test-data/                 test data, kept out of the test code
 │   ├── users.json
 │   ├── search.json
@@ -104,10 +106,13 @@ Without it, the two tests are **skipped** with a clear message, and everything e
 - **Stable locators.** The site gives its elements `data-test` attributes. The config makes them the default for `getByTestId()`, so the tests do not depend on CSS classes or layout.
 - **No fixed waits.** There is no `waitForTimeout`. Assertions wait by themselves. Where the page needs time, the page object waits for a real signal: after a search, the grid sets `data-test="search_completed"`, and `ProductListPage.search()` waits for it. Without this, a test could read the products that were on the page before the search.
 - **Each test is independent.** Every checkout test fills its own cart, so tests can run in any order and in parallel.
+- **The real user path.** Checkout tests open the cart with the cart icon in the header, as a user does, instead of loading `/checkout` directly.
+- **Honest results when the site blocks us.** The site is behind Cloudflare. From some machines (for example GitHub's servers), a page load can show "Verify you are human" instead of the page. The tests never try to get past that check: the test is **skipped** with the reason "Blocked by the site's bot protection", so the report shows "not tested" instead of a false pass or a false failure.
 - **No accounts are created.** The register test sends an empty body, which the API rejects before saving anything.
 - **Careful with a shared public site.** Two workers in CI, one retry in CI only (for network hiccups), and a trace, screenshot and video when a test fails.
 
 ## Limits
 
 - The site is public and shared. Its products or texts can change, and it can be slow or down. A failure is not always a bug in the tests: check the report first.
+- Cloudflare's bot check can appear on CI machines. Affected tests are skipped, not passed. Check the skipped count in the report.
 - Not covered: registration of a new account (it would create real accounts on a shared site), logged-in checkout, payment methods other than cash on delivery, and the admin area.

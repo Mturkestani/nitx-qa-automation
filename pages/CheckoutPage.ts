@@ -1,4 +1,5 @@
 import { Page, Locator } from '@playwright/test';
+import { waitForPageOrSkip } from '../utils/botCheck';
 
 export type Guest = { email: string; firstName: string; lastName: string };
 export type Address = {
@@ -16,6 +17,8 @@ export type Address = {
  */
 export class CheckoutPage {
   readonly page: Page;
+
+  readonly cartIcon: Locator;
 
   // Step 1: cart
   readonly cartProductTitles: Locator;
@@ -46,6 +49,7 @@ export class CheckoutPage {
   constructor(page: Page) {
     this.page = page;
 
+    this.cartIcon = page.getByTestId('nav-cart');
     this.cartProductTitles = page.getByTestId('product-title');
     this.proceedFromCart = page.getByTestId('proceed-1');
 
@@ -69,8 +73,13 @@ export class CheckoutPage {
     this.paymentSuccess = page.getByTestId('payment-success-message');
   }
 
+  /**
+   * Open the cart the way a user does: click the cart icon in the header.
+   * This stays inside the app (no full page load), and it is the real user path.
+   */
   async open() {
-    await this.page.goto('/checkout');
+    await this.cartIcon.click();
+    await waitForPageOrSkip(this.page, this.proceedFromCart);
   }
 
   async continueAsGuest(guest: Guest) {
